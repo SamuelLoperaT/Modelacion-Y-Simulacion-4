@@ -1,20 +1,20 @@
 function [freq_table,org_stats_table ,freq_stats_table,sim_data,sim_stats_table,Histograms,Graphics] = stats(data, num_bins,data_quant,histmode)
-    data = data(:); % Convierte los datos a un vector columna, para que se puedan procesar datos nxm-dimensionales
+    dataU = data(:); % Convierte los datos a un vector columna, para que se puedan procesar datos nxm-dimensionales
     %Estadisticos Originales
-    org_mean_val = mean(data);
-    org_median_val = prctile(data,50);
-    org_mode_val = mode(data);
-    org_std_val = std(data);
-    org_1stQuartile_val = prctile(data,25);
-    org_3rdQuartile_val = prctile(data,75);
-    org_kurtosis_val = kurtosis(data); %Kurtosis Original
-    org_skewness_val = skewness(data); %Asimetria Original
+    org_mean_val = mean(dataU);
+    org_median_val = prctile(dataU,50);
+    org_mode_val = mode(dataU);
+    org_std_val = std(dataU);
+    org_1stQuartile_val = prctile(dataU,25);
+    org_3rdQuartile_val = prctile(dataU,75);
+    org_kurtosis_val = kurtosis(dataU); %Kurtosis Original
+    org_skewness_val = skewness(dataU); %Asimetria Original
     freq_stats = [org_mean_val org_std_val org_1stQuartile_val org_median_val org_3rdQuartile_val org_skewness_val org_kurtosis_val];
     org_stats_table = array2table(freq_stats,"VariableNames",["Media" "Desviacion_Estandar" "1er_Cuartil" "Mediana_(2do_Cuartil)" "3er_Cuartil" "Asimetria" "Kurtosis"]);
     %Variables Necesarias para la Tabla de Frecuencia
     
-    min_data = min(data);
-    max_data = max(data);
+    min_data = min(dataU);
+    max_data = max(dataU);
     num_bins = ceil(num_bins); %toma en cuenta reglas de seleccion como la regla de sturges o raiz cuadrada; toma el entero superior mas cercano
     bin_width = (max_data - min_data) / num_bins; % Tamaño (Amplitud) de las clas
     bins = min_data:bin_width:max_data; % Bordes de las clases
@@ -23,7 +23,7 @@ function [freq_table,org_stats_table ,freq_stats_table,sim_data,sim_stats_table,
 
     %Creacion de la Tabla de Frecuencia
     for i = 1:num_bins
-        bin_indices = (data >= bins(i)) & (data < bins(i + 1)); % Indices para la clase Actual
+        bin_indices = (dataU >= bins(i)) & (dataU < bins(i + 1)); % Indices para la clase Actual
         freq_table(i, 1) = bins(i);
         freq_table(i, 2) = bins(i+1);
         freq_table(i, 3) = (bins(i) + bins(i + 1)) / 2; % Marca de Clase (Naive, dato de la mitad)
@@ -34,9 +34,9 @@ function [freq_table,org_stats_table ,freq_stats_table,sim_data,sim_stats_table,
     [~, max_index] = max(freq_table(:,2)); % indice de la clase con la mayor frecuencia/Densidad
     freq_mode_val = freq_table(max_index, 1); %  Moda
     
-    sorted_data = sort(data); % Organiza la data
+    sorted_data = sort(dataU); % Organiza la data
     
-    n = length(data);
+    n = length(dataU);
     
     %Mediana
     if mod(n, 2) == 1 %Caso Impar
@@ -74,7 +74,7 @@ function [freq_table,org_stats_table ,freq_stats_table,sim_data,sim_stats_table,
         %Crea Histograma con el modo por defecto (Frecuencia Absoluta) y
         %asigna un titulo arbitrario y las marcas de clase como identificadores
         %en el eje x
-        Histograms(1) = histogram(data,num_bins);
+        Histograms(1) = histogram(dataU,num_bins);
         xticks(freq_table.Marca_De_Clase)
         title("Data Histogram")
         %Adiciones
@@ -93,7 +93,7 @@ function [freq_table,org_stats_table ,freq_stats_table,sim_data,sim_stats_table,
         %Crea Histograma con el modo de probabilidad (Frecuencia Relativa) y
         %asigna un titulo arbitrario y las marcas de clase como identificadores
         %en el eje x
-        Histograms(1) = histogram(data,num_bins,"Normalization","probability");
+        Histograms(1) = histogram(dataU,num_bins,"Normalization","probability");
         xticks(freq_table.Marca_De_Clase)
         title("Data Histogram")
         %Adiciones
@@ -110,8 +110,8 @@ function [freq_table,org_stats_table ,freq_stats_table,sim_data,sim_stats_table,
     end
     %Simula data sintetica a partir de los datos de la tabla de frecuencia
     sim_data = [];
-    for i = 1:num_bins
-        sim_data = [sim_data unifrnd(bins(i),bins(i+1),1,ceil(freq_table.Frecuencia_Relativa(i)*data_quant))]; %Warning de complejidad computacional
+    for c = 1:length(freq_table.Limite_Inferior)
+        sim_data = [sim_data; freq_table.Limite_Inferior(c) + (freq_table.Limite_Superior(c)-freq_table.Limite_Inferior(c)).*rand(ceil(data_quant*freq_table.Frecuencia_Relativa(c)),1)];
     end
     %Estadisticos comunes de la data simulada; realizados con las funciones
     %de matlab
@@ -173,11 +173,11 @@ function [freq_table,org_stats_table ,freq_stats_table,sim_data,sim_stats_table,
     end
     grida = 0.5:0.5:99.5;
     
-    org_percentiles = prctile(data,grida);
+    org_percentiles = prctile(dataU,grida);
     sim_percentiles = prctile(sim_data,grida);
     xy = linspace(min(org_percentiles),max(org_percentiles),length(org_percentiles));
     figure;
-    Graphics =plot(sim_percentiles,org_percentiles,"b");
+    Graphics(1) = plot(sim_percentiles,org_percentiles,"b");
     hold on
     title("Percentile vs Percentile")
     plot(xy,xy,"r--")
@@ -185,5 +185,44 @@ function [freq_table,org_stats_table ,freq_stats_table,sim_data,sim_stats_table,
     ylabel("Percentiles Crudos")
     legend(["Percentiles" "y = x"])
     hold off
-
+    
+    figure;
+    ecdf(sorted_data);
+    hold on
+    title("Data Empirical Distribution")
+    xlabel("x values")
+    hold off
+    
+    data_dim = size(data);
+    if  data_dim(2) == 2
+        u = ksdensity(data(:,1),data(:,1),'function','cdf');
+        v = ksdensity(data(:,2),data(:,2),'function','cdf');
+        [Rho,nu] = copulafit('t',[u v],'Method','ApproximateML');
+        r = copularnd('t',Rho,nu,1000);
+        u1 = r(:,1);
+        v1 = r(:,2);
+        Graphics(2)= scatter(u1,v1);
+        hold on
+        title("Copula de datos en R^2")
+        xlabel("X")
+        ylabel("Y")
+        hold off
+    end
+    if data_dim(2) == 3
+        u = ksdensity(data(:,1),data(:,1),'function','cdf');
+        v = ksdensity(data(:,2),data(:,2),'function','cdf');
+        w = ksdensity(data(:,3),data(:,3),'function','cdf');
+        [Rho,nu] = copulafit('t',[u v w],'Method','ApproximateML');
+        r = copularnd('t',Rho,nu,1000);
+        u1 = r(:,1);
+        v1 = r(:,2);
+        w1 = r(:,3);
+        Graphics(2)= scatter3(u1,v1,w1);
+        hold on
+        title("Copula de datos en R^3")
+        xlabel("X")
+        ylabel("Y")
+        zlabel("Z")
+        hold off
+    end
 end
