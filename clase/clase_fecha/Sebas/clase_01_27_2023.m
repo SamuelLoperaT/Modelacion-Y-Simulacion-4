@@ -2,8 +2,6 @@
 
 plotmatrix(data5)
 
-plotmatrix(data8)
-
 % construction of a indicatior
 
     % covariance matrix

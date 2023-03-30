@@ -1,36 +1,3 @@
-%% sim 1:
-    % simulacion de datos Norm(mu,sigma^2)
-    % parametros
-    mu = 3.5;
-    sigma = 0.2;
-    % simualcion de X~Norm(mu,sigma^2)
-    data01 = mu + sigma*randn(1000,1);
-    % hist(data01)
-
-%% sim 2:
-    % simualcion
-    data02 = mu + sigma*randn(1000,1);
-
-    % media aretmetica
-    xbar = mean(data02);
-
-    %desviacion estandard muestral
-    S = std(data02);
-
-    % Z-score
-    Z = (data02-xbar)/S;
-
-    % ubicacion de los valores mayores a 3 sigma 
-    I1 = find(Z>3);
-    % valores mayores a 3 sigma
-    O1 = data02(I1);
-
-    % ubicacion de los valores menores a 3 sigma 
-    I2 = find(Z<3);
-    % valores menores a 3 sigma
-    O2 = data02(I2);
-    hist(data02)
-
  %% Ejersicio
     % generar n vectores en una circurferencia euclidea
     % proyectar datos sobre cada vector
@@ -100,14 +67,3 @@
         plot(data03(:,1),data03(:,2),'o')
         hold on
         plot(data03(I2,1),data03(I2,2),'or')
-
-%% sim 3
-    % simalacion normal estadar con 3 dimenciones
-    data04 = randn(1000,3);
-    % grafica 3D
-    plot3(data04(:,1),data04(:,2),data04(:,3),'o')
-
-
-    
-
-

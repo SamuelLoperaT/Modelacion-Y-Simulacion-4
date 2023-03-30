@@ -9,7 +9,7 @@
     data01_median = median(data01) 
 
 % sim 2
-    data02 = log(rand(1000,1))
+    data02 = log(rand(1000,1));
     hist(data02)
     A = skewness(data02) 
     x_bar = mean(data02) % centro de masa
@@ -46,10 +46,10 @@
     RI = Q3 - Q1;
     BI = Q1 - 1.5*RI;
     BS = Q3 + 1.5*RI;
-    OS = find(data03 > BS)
-    OI = find(data03 < BI)
+    OS = find(data03 > BS);
+    OI = find(data03 < BI);
 
-    data03(OS) =[]
+    data03(OS) = [];
     boxplot(data03,'Orientation','horizontal')
 
 
