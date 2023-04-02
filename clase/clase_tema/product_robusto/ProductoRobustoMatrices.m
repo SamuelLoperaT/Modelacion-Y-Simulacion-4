@@ -1,4 +1,4 @@
-function robust_product = ProductoRobustoMatrices (A,B)
+function [robust_product condition_number] = ProductoRobustoMatrices (A,B)
     % Robust Matrix Product
     % Inputs: A,B - matrices
     % Output: robust_product - robust product of A and B
